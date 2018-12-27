@@ -1,0 +1,32 @@
+#Calculator Fibonancci (Markus Mertama 2015)
+#Capitals are pseudo instuctionss
+#other characters are instructions
+#R + number is 16 bit int   (used for branching and loops)
+#P + number is 32 bit float (used for arithmetics)
+    R10                 # store loops n0 (n) --> top
+    P0                  #store f0
+    d                   #duplicate for printing
+    =                   #print
+    P1                  #store f1         (n, f0, f1)
+    L(thisbos,3)        # label with offset
+    R(thispos)          # store thispos (why this is here?, why end by terminating?)  (n , f0, f1, thispos + 3) 
+    j                   # jump over quit instruction (n , f0, f1)
+    L(endpos)
+    !                   #quit
+    L(loop)             #label to jump back (n, f0, f1)
+    d                   #dup f1 for next loop  (n , f0, f1, f1)
+    r                   #rot f1 under f0  (n , f1, f1, f0)
+    +                   #f = f0 + f1      (n , f1, f2)
+    d                   #dup for printing              (n , f1, f2, f2)
+    =                   #print it         (n , f1, f2)
+    r                   #rot n0 on top    (f1 , f2, n)
+    R1                  # store decrementor   (f1 , f2, n, 1)
+    s                   #swap             (f1, f2, 1, n)
+    -                   #dec one          (f1 , f2, n1)
+    d                   #dup incremented  (f1 , f2, n1, n1)
+    R(endpos)           # (f1 , f2, n1, n1, endpos)
+    z                   #if n1 zero label (f1 , f2, n1)
+    r                   #(f2 , n1, f1)
+    r                   #(n1 , f1, f2)
+    R(loop);            #(n1 , f1, f2, loop)
+    j                   #jump to loop (n1 , f1, f2)
