@@ -55,20 +55,23 @@ DISTFILES +=    \
     modbus_const.template
 
 # There definitions may need tuning, TBC (osx seems to be ok :-)
-## Define to 1 if you have the `accept4' function. */
-DEFINES+=HAVE_ACCEPT4=1
 
 ## Define to 1 if you have the <arpa/inet.h> header file. */
 DEFINES+=HAVE_ARPA_INET_H=1
 
+!osx{
 ## Define to 1 if you have the <byteswap.h> header file. */
-DEFINES+=HAVE_BYTESWAP_H=1
+    DEFINES+=HAVE_BYTESWAP_H=1
+## Define to 1 if you have the declaration of `TIOCSRS485', and to 0 if you don't. */
+    DEFINES+=HAVE_DECL_TIOCSRS485=1
+## Define to 1 if you have the `accept4' function. */
+    DEFINES+=HAVE_ACCEPT4=1
+}
+
 
 ## Define to 1 if you have the declaration of `TIOCM_RTS', and to 0 if you don't. */
 DEFINES+=HAVE_DECL_TIOCM_RTS=1
 
-## Define to 1 if you have the declaration of `TIOCSRS485', and to 0 if you don't. */
-DEFINES+=HAVE_DECL_TIOCSRS485=1
 
 ## Define to 1 if you have the declaration of `__CYGWIN__', and to 0 if you don't. */
 DEFINES+=HAVE_DECL___CYGWIN__=1
