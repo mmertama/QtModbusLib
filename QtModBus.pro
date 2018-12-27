@@ -54,7 +54,7 @@ DISTFILES +=    \
     readme.txt  \
     modbus_const.template
 
-osx{
+# There definitions may need tuning, TBC (osx seems to be ok :-)
 ## Define to 1 if you have the `accept4' function. */
 DEFINES+=HAVE_ACCEPT4=1
 
@@ -181,5 +181,3 @@ DEFINES+=HAVE_WORKING_FORK=1
 ## Define to 1 if `vfork' works. */
 DEFINES+=HAVE_WORKING_VFORK=1
 
-
-}
