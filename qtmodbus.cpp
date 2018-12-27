@@ -71,8 +71,8 @@ public:
     int m_wait = 0;
 };
 
-#define LOCKR QMutexLocker _rlock(&(d_ptr->m_readMutex));
-#define LOCKW QMutexLocker _wlock(&(d_ptr->m_writeMutex)); //Test: same lock, at least one fails! //Todo: check
+#define LOCKR QMutexLocker _rlock(&(m_priv->m_readMutex));
+#define LOCKW QMutexLocker _wlock(&(m_priv->m_writeMutex)); //Test: same lock, at least one fails! //Todo: check
 
 void ModbusPrivate::setMapping(ModbusMapping* m){
     delete m_mapping;
@@ -101,13 +101,13 @@ ModbusPrivate::~ModbusPrivate(){
     delete m_mapping;
 }
 
-#define MODBUS (d_ptr->d())
+#define MODBUS (m_priv->d())
 
 
-#define RETRY_READ(_b) int _b = -1; while(d_ptr->retry(_b))
-#define RETRY_WRITE(_b) int _b = -1; while(d_ptr->retry(_b))
+#define RETRY_READ(_b) int _b = -1; while(m_priv->retry(_b))
+#define RETRY_WRITE(_b) int _b = -1; while(m_priv->retry(_b))
 
-Modbus::Modbus(QObject* parent, ModbusPrivate* modbus) : QObject(parent), d_ptr(modbus){
+Modbus::Modbus(QObject* parent, ModbusPrivate* modbus) : QObject(parent), m_priv(modbus){
     qRegisterMetaType<ModBUS::Vec8>("ModbusVec8");
     qRegisterMetaType<ModBUS::Vec16>("ModbusVec16");
 }
@@ -322,17 +322,17 @@ Vec8 Modbus::reportSlaveId(int maxDest, int* written){
 ModbusMapping* Modbus::newMapping(int nbBits, int nbInputBits, int nbRegisters, int nbInputRegisters, bool takeOwnerShip){
     ModbusMapping* m = new ModbusMappingPrivate(nbBits, nbInputBits, nbRegisters, nbInputRegisters);
     if(takeOwnerShip)
-        d_ptr->setMapping(m);
+        m_priv->setMapping(m);
     return m;
 }
 
 ModbusMapping* Modbus::mapping() const {
-    return d_ptr->mapping();
+    return m_priv->mapping();
 }
 
 
 
-int Modbus::reply(Vec8 req, ModbusMapping& mapping){
+int Modbus::reply(const Vec8& req, ModbusMapping& mapping){
     QScopedPointer<modbus_mapping_t> modmapping(new modbus_mapping_t);
 
     modmapping.data()->nb_bits = mapping.bitsLen();
@@ -348,11 +348,11 @@ int Modbus::reply(Vec8 req, ModbusMapping& mapping){
     return modbus_reply(MODBUS, req.data(), req.length(), modmapping.data());
 }
 
-int Modbus::replyException(Vec8 req, unsigned int exceptionCode){
+int Modbus::replyException(const Vec8& req, unsigned int exceptionCode){
     return modbus_reply_exception(MODBUS, req.data(), exceptionCode);
 }
 
-int Modbus::sendRawRequest(Vec8 req){
+int Modbus::sendRawRequest(const Vec8& req){
     return modbus_send_raw_request(MODBUS, const_cast<quint8*>(req.data()), req.length());
 }
 
@@ -471,7 +471,7 @@ bool Modbus::writeAndReadRegisters(int id, int writeAddr, const Sec16 src, int r
 bool Modbus::reportSlaveId(int id, int maxDest){
     QFuture<void> future = QtConcurrent::run([this, id, maxDest](){
         int s;
-        Vec8 vec = reportSlaveId(maxDest, &s);
+        const Vec8 vec = reportSlaveId(maxDest, &s);
         emit Modbus::bitsRead(this, id, vec, s);
     });
     return future.isStarted();
@@ -479,7 +479,7 @@ bool Modbus::reportSlaveId(int id, int maxDest){
 
 bool Modbus::connectAsync(){
     QFuture<void> future = QtConcurrent::run([this](){
-            bool success = connect();
+            const bool success = connect();
             emit Modbus::connected(this, success);
        });
     return future.isStarted();
@@ -488,7 +488,7 @@ bool Modbus::connectAsync(){
 
 bool Modbus::setRetryAttempts(int retries, int waitMs){
     if(retries > 0){
-        d_ptr->setRetryAttempts(retries, waitMs);
+        m_priv->setRetryAttempts(retries, waitMs);
         return true;
         }
     return false;
@@ -645,7 +645,7 @@ void ModBusLibrary::setBitsFromBytes(quint8* dest, int idx, int nbBits, const qu
     modbus_set_bits_from_bytes(dest, idx, nbBits, tabByte + index);
 }
 
-quint8 ModBusLibrary::getByteFromBits(Vec8 src, int idx, unsigned int nbBits){
+quint8 ModBusLibrary::getByteFromBits(const Vec8& src, int idx, unsigned int nbBits){
     return getByteFromBits(src.data(), idx, nbBits);
 }
 
@@ -653,11 +653,11 @@ quint8 ModBusLibrary::getByteFromBits(const quint8* const src, int idx, unsigned
     return modbus_get_byte_from_bits(src, idx, nbBits);
 }
 
-qreal ModBusLibrary::getReal(Vec16 src, int& index){
+qreal ModBusLibrary::getReal(const Vec16& src, int& index){
     return getReal(src.data(), index);
 }
 
-qreal ModBusLibrary::getRealDcba(Vec16 src, int& index){
+qreal ModBusLibrary::getRealDcba(const Vec16& src, int& index){
     return getRealDcba(src.data(), index);
 }
 

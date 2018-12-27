@@ -128,10 +128,10 @@ public:
 
     ModbusMapping* newMapping(int nbBits = MODBUS_MAX_READ_BITS, int nbInputBits = MODBUS_MAX_WRITE_BITS, int nbRegisters = MODBUS_MAX_READ_REGISTERS, int nbInputRegisters = MODBUS_MAX_WRITE_REGISTERS, bool takeOwnership = true);
 
-    int sendRawRequest(Vec8 req);
+    int sendRawRequest(const Vec8& req);
 
-    int reply(Vec8 req, ModbusMapping& mapping);
-    int replyException(Vec8 req, unsigned int exceptionCode);
+    int reply(const Vec8& req, ModbusMapping& mapping);
+    int replyException(const Vec8& req, unsigned int exceptionCode);
 
     bool receive();
     bool receiveConfirmation();
@@ -139,18 +139,18 @@ public:
     bool setRetryAttempts(int retries, int waitMs = 0);
 
 signals:
-    void received(Modbus*, ModBUS::Vec8 data);
-    void confirmationReceived(Modbus*, ModBUS::Vec8 data);
+    void received(Modbus*, const ModBUS::Vec8& data);
+    void confirmationReceived(Modbus*, const ModBUS::Vec8& data);
     void wrote(Modbus*, int id, int status);
-    void bitsRead(Modbus*, int id, ModBUS::Vec8 data, int status);
-    void wordsRead(Modbus*, int id, ModBUS::Vec16 data, int status);
-    void inputBitsRead(Modbus*, int id, ModBUS::Vec8 data, int status);
-    void inputWordsRead(Modbus*, int id, ModBUS::Vec16 data, int status);
+    void bitsRead(Modbus*, int id, const ModBUS::Vec8& data, int status);
+    void wordsRead(Modbus*, int id, const ModBUS::Vec16& data, int status);
+    void inputBitsRead(Modbus*, int id, const ModBUS::Vec8& data, int status);
+    void inputWordsRead(Modbus*, int id, const ModBUS::Vec16& data, int status);
     void connected(Modbus*, bool success);
 
 
 protected:
-     QScopedPointer<ModbusPrivate> d_ptr;
+     QScopedPointer<ModbusPrivate> m_priv;
 };
 
 class QTMODBUSSHARED_EXPORT ModbusRtu : public Modbus{
@@ -185,13 +185,13 @@ class QTMODBUSSHARED_EXPORT ModBusLibrary{
 public:
     static QString version();
     static bool versionCheck(int major, int minor, int micro);
-    static ModbusRtu* newRtu(QString device, int baud, char parity, int dataBit, int stopBit, QObject* parent = NULL);
-    static ModbusTcp* newTcp(QHostAddress ipaddress, int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = NULL);
-    static ModbusTcp* newTcpPi(QHostAddress node, int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = NULL);
-    static ModbusTcp* newTcpPi(QHostAddress node, QString service, QObject* parent = NULL);
-    static ModbusTcp* newTcp(int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = NULL);
-    static ModbusTcp* newTcpPi(int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = NULL);
-    static ModbusTcp* newTcpPi(QString service, QObject* parent = NULL);
+    static ModbusRtu* newRtu(QString device, int baud, char parity, int dataBit, int stopBit, QObject* parent = nullptr);
+    static ModbusTcp* newTcp(QHostAddress ipaddress, int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = nullptr);
+    static ModbusTcp* newTcpPi(QHostAddress node, int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = nullptr);
+    static ModbusTcp* newTcpPi(QHostAddress node, QString service, QObject* parent = nullptr);
+    static ModbusTcp* newTcp(int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = nullptr);
+    static ModbusTcp* newTcpPi(int port = ModbusTcp::TCP_DEFAULT_PORT, QObject* parent = nullptr);
+    static ModbusTcp* newTcpPi(QString service, QObject* parent = nullptr);
 
     static inline quint8 getHighByte(quint16 data) {return quint8 (data >> 8);}
 
@@ -203,7 +203,7 @@ public:
         static qint32 getInt32(const T* const tab, int index) {return tab[index] << (8 * sizeof(T)) + tab[index + 1];}
 
 
-    static inline void set(Vec8 tab, int index, quint16 value) {tab[index] = (quint8) (value >> 8); tab[index + 1] = quint8 (value) & 0xFF;}
+    static inline void set(Vec8& tab, int index, quint16 value) {tab[index] = (quint8) (value >> 8); tab[index + 1] = quint8 (value) & 0xFF;}
     static inline void set(quint8* tab, int index, quint16 value) {tab[index] = (quint8) (value >> 8); tab[index + 1] = quint8 (value) & 0xFF;}
 
     static void setBitsFromByte(Vec8& des, int idx, const quint8 value);
@@ -213,9 +213,9 @@ public:
     static void setBitsFromBytes(quint8* dest, int idx, int nbBits, const quint8* const tabByte, int index);
 
 
-    static quint8 getByteFromBits(Vec8 src, int idx, unsigned int nbBits);
-    static qreal getReal(Vec16 src, int& index);
-    static qreal getRealDcba(Vec16 src, int& index);
+    static quint8 getByteFromBits(const Vec8& src, int idx, unsigned int nbBits);
+    static qreal getReal(const Vec16& src, int& index);
+    static qreal getRealDcba(const Vec16& src, int& index);
 
     static quint8 getByteFromBits(const quint8* const src, int idx, unsigned int nbBits);
     static qreal getReal(const quint16* const src, int& index);
